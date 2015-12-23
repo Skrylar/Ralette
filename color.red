@@ -4,6 +4,13 @@ Red [
    Version: 0.0.1
 ]
 
+; algorithms from here
+; https://en.wikipedia.org/wiki/HSL_and_HSV
+; accessed 2015-12-18
+
+; XXX we might benefit from this
+; http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
+
 ; XXX this is all 8-bit color!
 
 ;; Converts an 8-bit RGB tuple to an integer. Alpha is assumed to always be 100% visibility.
@@ -174,6 +181,52 @@ rgb8-to-hsl8: func [
    ret
 ]
 
+;; Converts an 8-bit tuple of RGB color to an 8-bit tuple
+;; of HSL values.
+
+;; XXX see if we should used fixed point arithmetic, using
+;; floating point could possibly lead to colors being imprecisely
+;; derped with by hardware!
+hsl8-to-rgb8: func [
+   color [tuple!]
+   return: [tuple!]
+   /local h s l x r g b ret
+][
+   ; unpack our colors
+   h: ((color/1) / 255.0) * 360.0
+   s: (color/2) / 255.0
+   l: (color/3) / 255.0
+   ; reverse engineer chroma
+   chroma: (1 - absolute (2 * l - 1)) * s
+   ; reverse engineer H from H'
+   h: h / 60.0
+   x: chroma * (1 - absolute (modulo (h - 1) 2))
+   ; make sure these are set, in case of weirdness
+   r: 0
+   g: 0
+   b: 0
+   ; figure out incomplete RGB values
+   switch round/down h [
+      0 [r: chroma g: x]
+      1 [r: x g: chroma]
+      2 [g: chroma b: x]
+      3 [g: x b: chroma]
+      4 [r: x b: chroma]
+      5 [r: chroma b: x]
+   ]
+   ; finalize RGB values
+   m: l - (chroma * 0.5)
+   r: r + m
+   g: g + m
+   b: b + m
+   ; now return the soup
+   ret: 0.0.0
+   ret/1: to integer! (r * 255.0)
+   ret/2: to integer! (g * 255.0)
+   ret/3: to integer! (b * 255.0)
+   ret
+]
+
 ; XXX define these via parse or some smartness, instead of dopey
 ; copypasta.
 
@@ -207,8 +260,4 @@ rgb8-to-saturation8: func [
 ;; Converts an RGB tuple to an HSL tuple. Alpha channel is preserved as-is.
 
 ; test stuff
-print rgb8-to-hue8 255.128.64
-print rgb8-to-saturation8 255.128.64
-print rgb8-to-lightness8 255.128.64
-
-print rgb8-to-hsl8 255.128.64
+print hsl8-to-rgb8 rgb8-to-hsl8 255.0.0
