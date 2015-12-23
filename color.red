@@ -244,6 +244,17 @@ hsl8: context [
 
    ;; Converts an 8-bit RGB tuple to an 8-bit HSL tuple.
    from-rgb8: :rgb8/to-hsl8
+
+   ;; Returns the compliment of the supplied color.
+   compliment: func [
+      color [tuple!]
+      return: [tuple!]
+      /local ret
+   ][
+      ret: color
+      ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
+      ret
+   ]
 ]
 
 rgba8: context [
@@ -276,3 +287,5 @@ rgba8: context [
 ; test stuff
 print rgb8/from-hsl8 rgb8/to-hsl8 255.0.0
 print hsl8/to-rgb8 hsl8/from-rgb8 255.0.0
+
+print rgb8/from-hsl8 hsl8/compliment rgb8/to-hsl8 255.0.0
