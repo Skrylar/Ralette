@@ -322,8 +322,6 @@ rgb8: context [
     ][
        to integer! ((rgb8-to-saturation color) * 255.0)
     ]
-
-    ;; Converts an RGB tuple to an HSL tuple. Alpha channel is preserved as-is.
 ]
 
 hsl8: context [
@@ -332,6 +330,22 @@ hsl8: context [
 
    ;; Converts an 8-bit RGB tuple to an 8-bit HSL tuple.
    from-rgb8: :rgb8/to-hsl8
+
+   ;; Converts an 8-bit HSL tuple to an 8-bit HSV tuple.
+   to-hsv8: func [
+      color [tuple!]
+      return: [tuple!]
+   ][
+      rgb8/to-hsv rgb8/from-hsl8 color
+   ]
+
+   ;; Converts an 8-bit HSV tuple to an 8-bit HSL tuple.
+   from-hsv8: func [
+      color [tuple!]
+      return: [tuple!]
+   ][
+      rgb8/to-hsl rgb8/from-hsv8 color
+   ]
 
    ;; Returns the compliment of the supplied color.
    compliment: func [
