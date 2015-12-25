@@ -160,7 +160,95 @@ rgb8: context [
     ]
 
     ;; Converts an 8-bit tuple of RGB color to an 8-bit tuple
-    ;; of HSL values.
+    ;; of HSV values.
+
+    ;; XXX see if we should used fixed point arithmetic, using
+    ;; floating point could possibly lead to colors being imprecisely
+    ;; derped with by hardware!
+    to-hsv8: func [
+       color [tuple!]
+       return: [tuple!]
+       /local minc maxc chroma r g b h s v ret
+    ][
+       ; figure out chroma
+       r: (color/1) / 255.0
+       g: (color/2) / 255.0
+       b: (color/3) / 255.0
+       minc: min min r g b
+       maxc: max max r g b
+       chroma: to float! (maxc - minc)
+       ; convert to hue
+       h: 0
+       either chroma <> 0 [
+	  ; M = R
+	  if maxc = r [h: modulo ((g - b) / chroma) 6]
+	  ; M = G
+	  if maxc = g [h: ((b - r) / chroma) + 2]
+	  ; M = B
+	  if maxc = b [h: ((r - g) / chroma) + 4]
+          s: chroma / maxc
+       ][
+          s: 0
+       ]
+       ; convert to HSV
+       h: (h * 60.0)
+       v: maxc
+       ; now encode the result
+       ret: 0.0.0
+       ret/1: to integer! ((h / 360.0) * 255.0)
+       ret/2: to integer! (s * 255.0)
+       ret/3: to integer! (v * 255.0)
+       ret
+    ]
+
+    ;; Converts an 8-bit tuple of HSV color to an 8-bit tuple
+    ;; of RGB values.
+
+    ;; XXX see if we should used fixed point arithmetic, using
+    ;; floating point could possibly lead to colors being imprecisely
+    ;; derped with by hardware!
+    from-hsv8: func [
+       color [tuple!]
+       return: [tuple!]
+       /local h s v x r g v ret
+    ][
+       ; unpack our colors
+       h: ((color/1) / 255.0) * 360.0
+       s: (color/2) / 255.0
+       v: (color/3) / 255.0
+       ; reverse engineer chroma
+       chroma: v * s
+       ; reverse engineer H from H'
+       h: h / 60.0
+       x: chroma * (1 - absolute (modulo (h - 1) 2))
+       ; make sure these are set, in case of weirdness
+       r: 0
+       g: 0
+       b: 0
+       ; figure out incomplete RGB values
+       switch round/down h [
+	  0 [r: chroma g: x]
+	  1 [r: x g: chroma]
+	  2 [g: chroma b: x]
+	  3 [g: x b: chroma]
+	  4 [r: x b: chroma]
+	  5 [r: chroma b: x]
+       ]
+       ; finalize RGB values
+       m: v - chroma
+       r: r + m
+       g: g + m
+       b: b + m
+       ; now return the soup
+       ret: 0.0.0
+       ret/1: to integer! (r * 255.0)
+       ret/2: to integer! (g * 255.0)
+       ret/3: to integer! (b * 255.0)
+       ret
+    ]
+
+    ;; Converts an 8-bit tuple of HSL color to an 8-bit tuple
+    ;; of RGB values.
 
     ;; XXX see if we should used fixed point arithmetic, using
     ;; floating point could possibly lead to colors being imprecisely
@@ -255,6 +343,16 @@ hsl8: context [
       ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
       ret
    ]
+
+   ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
+   contrast: func [
+      base [tuple!]
+      light [tuple!]
+      dark [tuple!]
+      return: [tuple!]
+   ][
+      ; TODO
+   ]
 ]
 
 rgba8: context [
@@ -285,7 +383,9 @@ rgba8: context [
 ]
 
 ; test stuff
+print rgb8/to-hsl8 255.0.0
 print rgb8/from-hsl8 rgb8/to-hsl8 255.0.0
-print hsl8/to-rgb8 hsl8/from-rgb8 255.0.0
+print rgb8/to-hsv8 255.0.0
+print rgb8/from-hsv8 rgb8/to-hsv8 255.0.0
 
 print rgb8/from-hsl8 hsl8/compliment rgb8/to-hsl8 255.0.0
