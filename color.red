@@ -8,6 +8,15 @@ Red [
 ; https://en.wikipedia.org/wiki/HSL_and_HSV
 ; accessed 2015-12-18
 
+; Performs a linear interpolation between `from-value` and `to-value`.
+lerp: func [
+   from-value [integer! float!]
+   to-value [integer! float!]
+   amount [float! percent!]
+][
+   from-value + ((to-value - from-value) * amount)
+]
+
 ; XXX we might benefit from this
 ; http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
 
@@ -322,6 +331,20 @@ rgb8: context [
     ][
        to integer! ((rgb8-to-saturation color) * 255.0)
     ]
+
+   mix: func [
+      color [tuple!]
+      target [tuple!]
+      amount [float! percent!]
+      /local ret
+   ][
+      ret: 0.0.0
+      ret/1: to integer! lerp (color/1) (target/1) amount
+      ret/2: to integer! lerp (color/2) (target/2) amount
+      ret/3: to integer! lerp (color/3) (target/3) amount
+      ret
+   ]
+
 ]
 
 hsl8: context [
@@ -445,3 +468,11 @@ print rgb8/to-hsv8 255.0.0
 print rgb8/from-hsv8 rgb8/to-hsv8 255.0.0
 
 print rgb8/from-hsl8 hsl8/compliment rgb8/to-hsl8 255.0.0
+
+print lerp 50 100 0%
+print lerp 50 100 50%
+print lerp 50 100 100%
+print lerp 50 100 200%
+
+print rgb8/mix 255.0.0 0.0.0 5%
+print rgb8/mix 255.0.0 0.255.0 5%
