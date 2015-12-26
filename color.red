@@ -443,6 +443,28 @@ rgba8: context [
       ret/3: (color/3)
       ret
    ]
+
+   ;; Makes a color some percent more transparent than it currently is.
+   transparentize: func [
+      color [tuple!]
+      amount [float! percent!]
+      /local ret
+   ][
+      ret: color
+      ret/4: min max to integer! (color/4) * amount 0 255
+      ret
+   ]
+
+   ;; Makes a color some percent more opaque than it currently is.
+   opacify: func [
+      color [tuple!]
+      amount [float! percent!]
+      /local ret
+   ][
+      ret: color
+      if amount <> 0 [ret/4: min max to integer! (color/4) / amount 0 255]
+      ret
+   ]
 ]
 
 hsv8: context [
@@ -476,3 +498,6 @@ print lerp 50 100 200%
 
 print rgb8/mix 255.0.0 0.0.0 5%
 print rgb8/mix 255.0.0 0.255.0 5%
+
+print rgba8/transparentize 255.255.255.255 50%
+print rgba8/opacify 255.255.255.255 50%
