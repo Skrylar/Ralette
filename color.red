@@ -345,6 +345,20 @@ rgb8: context [
       ret
    ]
 
+   ;; Makes a color lighter by mixing it with White by a given `amount`.
+   tint: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      mix color 255.255.255 amount
+   ]
+
+   shade: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      mix color 0.0.0 amount
+   ]
 ]
 
 hsl8: context [
