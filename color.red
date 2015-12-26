@@ -406,6 +406,20 @@ rgba8: context [
       ret/4: 255
       ret
    ]
+
+   ;; Converts an 8-bit RGBA tuple to an 8-bit RGB tuple by stripping out the fourth channel.
+   to-rgb8: func [
+      color: [tuple!]
+      return: [tuple!]
+      /local ret
+   ][
+      ; XXX is there a better way to do this?
+      ret: 0.0.0
+      ret/1: (color/1)
+      ret/2: (color/2)
+      ret/3: (color/3)
+      ret
+   ]
 ]
 
 hsv8: context [
