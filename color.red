@@ -365,7 +365,8 @@ hsl8: context [
       dark [tuple!]
       return: [tuple!]
    ][
-      ; TODO
+      ; convert to HSV and let that module handle it
+      from-hsv8 hsv8/contrast to-hsv8 base to-hsv8 light to-hsv8 dark
    ]
 ]
 
@@ -386,13 +387,40 @@ rgba8: context [
       color [integer!]
       return: [tuple!]
       /local ret
-      ][
+   ][
       ret: 0.0.0.0
       ret/1: (color >> 16) and 255
       ret/2: (color >> 8) and 255
       ret/3: color and 255
       ret/4: (color >> 24) and 255
       ret
+   ]
+
+   ;; Converts an 8-bit RGB tuple to an 8-bit RGBA tuple by assigning the fourth channel to full opacity.
+   from-rgba8: func [
+      color: [tuple!]
+      return: [tuple!]
+      /local ret
+   ][
+      ret: color
+      ret/4: 255
+      ret
+   ]
+]
+
+hsv8: context [
+   ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
+   contrast: func [
+      base [tuple!]
+      light [tuple!]
+      dark [tuple!]
+      return: [tuple!]
+   ][
+      either abs ((base/3) - (light/3)) > abs ((base/3) - (dark/3)) [
+	 light
+      ][
+         dark
+      ]
    ]
 ]
 
