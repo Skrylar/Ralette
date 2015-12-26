@@ -421,7 +421,7 @@ rgba8: context [
 
    ;; Converts an 8-bit RGB tuple to an 8-bit RGBA tuple by assigning the fourth channel to full opacity.
    from-rgba8: func [
-      color: [tuple!]
+      color [tuple!]
       return: [tuple!]
       /local ret
    ][
@@ -432,7 +432,7 @@ rgba8: context [
 
    ;; Converts an 8-bit RGBA tuple to an 8-bit RGB tuple by stripping out the fourth channel.
    to-rgb8: func [
-      color: [tuple!]
+      color [tuple!]
       return: [tuple!]
       /local ret
    ][
