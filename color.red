@@ -50,6 +50,8 @@ rgb8: context [
        ret
     ]
 
+    ;; XXX desaturate should have a refinement to pick HSV or HSL methods
+
     ;; Retrieves the hue of a color, given an 8-bit RGB tuple.
     ;; Returns the hue as a 32-bit [0, 360) floating point value.
 
@@ -384,6 +386,16 @@ hsl8: context [
       rgb8/to-hsl rgb8/from-hsv8 color
    ]
 
+   ;; Removes all saturation from a color.
+   desaturate: func [
+      color [tuple!]
+      return: [tuple!]
+   ][
+      ret: color
+      ret/2: 0
+      ret
+   ]
+
    ;; Returns the compliment of the supplied color.
    compliment: func [
       color [tuple!]
@@ -391,6 +403,7 @@ hsl8: context [
       /local ret
    ][
       ret: color
+      ; compliments are the opposite side of the color wheel from a given color
       ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
       ret
    ]
@@ -494,6 +507,16 @@ hsv8: context [
       ][
          dark
       ]
+   ]
+
+   ;; Removes all saturation from a color.
+   desaturate: func [
+      color [tuple!]
+      return: [tuple!]
+   ][
+      ret: color
+      ret/2: 0
+      ret
    ]
 ]
 
