@@ -457,80 +457,6 @@ hsl8: context [
    ]
 ]
 
-rgba8: context [
-   ;; Converts an 8-bit RGBA tuple to an integer.
-   to-integer: func [
-      color [tuple!]
-      return: [integer!]
-   ][
-      ((to integer! color/4) << 24) or
-      ((to integer! color/1) << 16) or
-      ((to integer! color/2) << 8) or
-      (to integer! color/3)
-   ]
-
-   ;; Converts an integer to an 8-bit RGBA tuple.
-   from-integer: func [
-      color [integer!]
-      return: [tuple!]
-      /local ret
-   ][
-      ret: 0.0.0.0
-      ret/1: (color >> 16) and 255
-      ret/2: (color >> 8) and 255
-      ret/3: color and 255
-      ret/4: (color >> 24) and 255
-      ret
-   ]
-
-   ;; Converts an 8-bit RGB tuple to an 8-bit RGBA tuple by assigning the fourth channel to full opacity.
-   from-rgba8: func [
-      color [tuple!]
-      return: [tuple!]
-      /local ret
-   ][
-      ret: color
-      ret/4: 255
-      ret
-   ]
-
-   ;; Converts an 8-bit RGBA tuple to an 8-bit RGB tuple by stripping out the fourth channel.
-   to-rgb8: func [
-      color [tuple!]
-      return: [tuple!]
-      /local ret
-   ][
-      ; XXX is there a better way to do this?
-      ret: 0.0.0
-      ret/1: (color/1)
-      ret/2: (color/2)
-      ret/3: (color/3)
-      ret
-   ]
-
-   ;; Makes a color some percent more transparent than it currently is.
-   transparentize: func [
-      color [tuple!]
-      amount [float! percent!]
-      /local ret
-   ][
-      ret: color
-      ret/4: min max to integer! (color/4) * amount 0 255
-      ret
-   ]
-
-   ;; Makes a color some percent more opaque than it currently is.
-   opacify: func [
-      color [tuple!]
-      amount [float! percent!]
-      /local ret
-   ][
-      ret: color
-      if amount <> 0 [ret/4: min max to integer! (color/4) / amount 0 255]
-      ret
-   ]
-]
-
 hsv8: context [
    ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
    contrast: func [
@@ -556,6 +482,80 @@ hsv8: context [
       ret
    ]
 ]
+
+;rgba8: context [
+   ;;; Converts an 8-bit RGBA tuple to an integer.
+   ;to-integer: func [
+      ;color [tuple!]
+      ;return: [integer!]
+   ;][
+      ;((to integer! color/4) << 24) or
+      ;((to integer! color/1) << 16) or
+      ;((to integer! color/2) << 8) or
+      ;(to integer! color/3)
+   ;]
+;
+   ;;; Converts an integer to an 8-bit RGBA tuple.
+   ;from-integer: func [
+      ;color [integer!]
+      ;return: [tuple!]
+      ;/local ret
+   ;][
+      ;ret: 0.0.0.0
+      ;ret/1: (color >> 16) and 255
+      ;ret/2: (color >> 8) and 255
+      ;ret/3: color and 255
+      ;ret/4: (color >> 24) and 255
+      ;ret
+   ;]
+;
+   ;;; Converts an 8-bit RGB tuple to an 8-bit RGBA tuple by assigning the fourth channel to full opacity.
+   ;from-rgba8: func [
+      ;color [tuple!]
+      ;return: [tuple!]
+      ;/local ret
+   ;][
+      ;ret: color
+      ;ret/4: 255
+      ;ret
+   ;]
+;
+   ;;; Converts an 8-bit RGBA tuple to an 8-bit RGB tuple by stripping out the fourth channel.
+   ;to-rgb8: func [
+      ;color [tuple!]
+      ;return: [tuple!]
+      ;/local ret
+   ;][
+      ;; XXX is there a better way to do this?
+      ;ret: 0.0.0
+      ;ret/1: (color/1)
+      ;ret/2: (color/2)
+      ;ret/3: (color/3)
+      ;ret
+   ;]
+;
+   ;;; Makes a color some percent more transparent than it currently is.
+   ;transparentize: func [
+      ;color [tuple!]
+      ;amount [float! percent!]
+      ;/local ret
+   ;][
+      ;ret: color
+      ;ret/4: min max to integer! (color/4) * amount 0 255
+      ;ret
+   ;]
+;
+   ;;; Makes a color some percent more opaque than it currently is.
+   ;opacify: func [
+      ;color [tuple!]
+      ;amount [float! percent!]
+      ;/local ret
+   ;][
+      ;ret: color
+      ;if amount <> 0 [ret/4: min max to integer! (color/4) / amount 0 255]
+      ;ret
+   ;]
+;]
 
 ; test stuff
 print rgb8/to-hsl8 255.0.0
