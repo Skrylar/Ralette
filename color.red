@@ -472,6 +472,18 @@ hsv8: context [
       ]
    ]
 
+   ;; Returns the compliment of the supplied color.
+   compliment: func [
+      color [tuple!]
+      return: [tuple!]
+      /local ret
+   ][
+      ret: color
+      ; compliments are the opposite side of the color wheel from a given color
+      ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
+      ret
+   ]
+
    ;; Removes all saturation from a color.
    desaturate: func [
       color [tuple!]
