@@ -476,6 +476,56 @@ hsv8: context [
    ;; Converts an 8-bit RGB tuple to an 8-bit HSL tuple.
    from-rgb8: :rgb8/to-hsv8
 
+   ;; Mixes two colors together.
+   mix: rgb8/mix ; NB has the same implementation for now
+
+   to-hue8: func [color [tuple!] return: [float!]]
+   [
+      (color/1)
+   ]
+
+   to-saturation-hsl8: func [color [tuple!] return: [float!]]
+   [
+      (hsl8/from-hsv8 color)/2
+   ]
+
+   to-saturation-hsv8: func [color [tuple!] return: [float!]]
+   [
+      (color/2)
+   ]
+
+   to-value8: func [color [tuple!] return: [float!]]
+   [
+      (color/3)
+   ]
+
+   to-lightness8: func [color [tuple!] return: [float!]]
+   [
+      (hsl8/from-hsv8 color)/3
+   ]
+
+   ;; Makes a color lighter by mixing saturation and lightness with white by `amount`.
+   tint: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      ret: 0.0.0
+      ret/2: to integer! lerp (color/2) 255 amount
+      ret/3: to integer! lerp (color/3) 255 amount
+      ret
+   ]
+
+   ;; Makes a color darker by mixing saturation and lightness with Black by a given `amount`.
+   shade: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      ret: 0.0.0
+      ret/2: to integer! lerp (color/2) 0 amount
+      ret/3: to integer! lerp (color/3) 0 amount
+      ret
+   ]
+
    ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
    contrast: func [
       base [tuple!]
