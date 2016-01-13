@@ -50,14 +50,8 @@ rgb8: context [
        ret
     ]
 
-    ;; XXX desaturate should have a refinement to pick HSV or HSL methods
-
     ;; Retrieves the hue of a color, given an 8-bit RGB tuple.
     ;; Returns the hue as a 32-bit [0, 360) floating point value.
-
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
     to-hue: func [
        color [tuple!]
        return: [float!]
@@ -86,10 +80,6 @@ rgb8: context [
 
     ;; Retrieves the lightness of a color, given an 8-bit RGB tuple.
     ;; Returns the hue as a 32-bit [0, 1] floating point value.
-
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
     to-lightness: func [
        color [tuple!]
        return: [float!]
@@ -104,13 +94,10 @@ rgb8: context [
        (maxc + minc) * 0.5
     ]
 
-    ;; Retrieves the lightness of a color, given an 8-bit RGB tuple.
-    ;; Returns the hue as a 32-bit [0, 1] floating point value.
-
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
-    to-saturation: func [
+    ;; Retrieves the saturation of a color, as determined by the HSL model,
+    ;; given an 8-bit RGB tuple. Returns the hue as a 32-bit [0, 1]
+    ;; floating point value.
+    to-saturation-hsl: func [
        color [tuple!]
        return: [float!]
        /local minc maxc chroma r g b lightness
@@ -216,12 +203,36 @@ rgb8: context [
        ret
     ]
 
+    ;; Converts an HSV color to an RGB color.
+    from-hsv: func [h s v 'r 'g 'b /local chroma x m hc]
+    [
+       ; reverse engineer chroma
+       chroma: v * s
+       ; reverse engineer H from H'
+       hc: (h / 60.0)
+       x: chroma * (1 - absolute (modulo (hc - 1) 2))
+       ; make sure these are set, in case of weirdness
+       set r 0
+       set g 0
+       set b 0
+       ; figure out incomplete RGB values
+       switch round/down h [
+	  0 [set r chroma set g x]
+	  1 [set r x set g chroma]
+	  2 [set g chroma set b x]
+	  3 [set g x set b chroma]
+	  4 [set r x set b chroma]
+	  5 [set r chroma set b x]
+       ]
+       ; finalize RGB values
+       m: v - chroma
+       set r (get r) + m
+       set g (get g) + m
+       set b (get b) + m
+    ]
+
     ;; Converts an 8-bit tuple of HSV color to an 8-bit tuple
     ;; of RGB values.
-
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
     from-hsv8: func [
        color [tuple!]
        return: [tuple!]
@@ -264,10 +275,6 @@ rgb8: context [
 
     ;; Converts an 8-bit tuple of HSL color to an 8-bit tuple
     ;; of RGB values.
-
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
     from-hsl8: func [
        color [tuple!]
        return: [tuple!]
@@ -307,9 +314,6 @@ rgb8: context [
        ret/3: to integer! (b * 255.0)
        ret
     ]
-
-    ; XXX define these via parse or some smartness, instead of dopey
-    ; copypasta.
 
     ;; Retrieves the hue of a color, given an 8-bit RGB tuple.
     ;; Returns the hue as an 8-bit integer.
