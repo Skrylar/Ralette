@@ -117,6 +117,33 @@ rgb8: context [
        ]
     ]
 
+    to-saturation-hsv: func [
+       color [tuple!]
+       return: [float!]
+       /local minc maxc chroma h s l
+    ][
+       ; figure out chroma
+       r: (color/1) / 255.0
+       g: (color/2) / 255.0
+       b: (color/3) / 255.0
+       minc: min min r g b
+       maxc: max max r g b
+       chroma: to float! (maxc - minc)
+       ; convert to hue
+       set h 0
+       if chroma <> 0 [
+       	  ; M = R
+       	  if maxc = r [set h (modulo ((g - b) / chroma) 6)]
+       	  ; M = G
+       	  if maxc = g [set h (((b - r) / chroma) + 2)]
+       	  ; M = B
+       	  if maxc = b [set h (((r - g) / chroma) + 4)]
+       ]
+       ; find brightness
+       l: ((maxc + minc) * 0.5)
+       (either chroma <> 0 [chroma / (1 - absolute (2 * l - 1))][0])
+    ]
+
     ;; Converts an RGB color to an HSL color.
     to-hsl: func [r g b 'h 's 'l /local minc maxc chroma]
     [
