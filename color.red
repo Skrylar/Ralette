@@ -458,6 +458,24 @@ hsl8: context [
 ]
 
 hsv8: context [
+   ;; Converts an 8-bit HSV tuple to an 8-bit RGB tuple.
+   to-hsl8: func [color [tuple!] return: [tuple!]]
+   [
+      rgb8/to-hsl8 rgb8/from-hsv8 color
+   ]
+
+   ;; Converts an 8-bit RGB tuple to an 8-bit HSV tuple.
+   from-hsl8: func [color [tuple!] return: [tuple!]]
+   [
+      rgb8/to-hsv8 rgb8/from-hsl8 color
+   ]
+
+   ;; Converts an 8-bit HSV tuple to an 8-bit RGB tuple.
+   to-rgb8: :rgb8/from-hsv8
+
+   ;; Converts an 8-bit RGB tuple to an 8-bit HSL tuple.
+   from-rgb8: :rgb8/to-hsv8
+
    ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
    contrast: func [
       base [tuple!]
