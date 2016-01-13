@@ -334,7 +334,7 @@ rgb8: context [
        color [tuple!]
        return: [integer!]
     ][
-       to integer! (((rgb8-to-hue color) / 360.0) * 255.0)
+       to integer! (((to-hue color) / 360.0) * 255.0)
     ]
 
     ;; Retrieves the lightness of a color, given an 8-bit RGB tuple.
@@ -343,45 +343,55 @@ rgb8: context [
        color [tuple!]
        return: [integer!]
     ][
-       to integer! ((rgb8-to-lightness color) * 255.0)
+       to integer! ((to-lightness color) * 255.0)
     ]
 
     ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
     ;; Returns the saturation as an 8-bit integer.
-    to-saturation8: func [
+    to-saturation-hsl8: func [
        color [tuple!]
        return: [integer!]
     ][
-       to integer! ((rgb8-to-saturation color) * 255.0)
+       to integer! ((to-saturation-hsl color) * 255.0)
     ]
 
-   mix: func [
-      color [tuple!]
-      target [tuple!]
-      amount [float! percent!]
-      /local ret
-   ][
-      ret: 0.0.0
-      ret/1: to integer! lerp (color/1) (target/1) amount
-      ret/2: to integer! lerp (color/2) (target/2) amount
-      ret/3: to integer! lerp (color/3) (target/3) amount
-      ret
-   ]
+    ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
+    ;; Returns the saturation as an 8-bit integer.
+    to-saturation-hsv8: func [
+       color [tuple!]
+       return: [integer!]
+    ][
+       to integer! ((to-saturation-hsv color) * 255.0)
+    ]
 
-   ;; Makes a color lighter by mixing it with White by a given `amount`.
-   tint: func [
-      color [tuple!]
-      amount [float! percent!]
-   ][
-      mix color 255.255.255 amount
-   ]
+    mix: func [
+       color [tuple!]
+       target [tuple!]
+       amount [float! percent!]
+       /local ret
+    ][
+       ret: 0.0.0
+       ret/1: to integer! lerp (color/1) (target/1) amount
+       ret/2: to integer! lerp (color/2) (target/2) amount
+       ret/3: to integer! lerp (color/3) (target/3) amount
+       ret
+    ]
 
-   shade: func [
-      color [tuple!]
-      amount [float! percent!]
-   ][
-      mix color 0.0.0 amount
-   ]
+    ;; Makes a color lighter by mixing it with White by a given `amount`.
+    tint: func [
+       color [tuple!]
+       amount [float! percent!]
+    ][
+       mix color 255.255.255 amount
+    ]
+
+    ;; Makes a color darker by mixing it with Black by a given `amount`.
+    shade: func [
+       color [tuple!]
+       amount [float! percent!]
+    ][
+       mix color 0.0.0 amount
+    ]
 ]
 
 hsl8: context [
