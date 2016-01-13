@@ -395,6 +395,12 @@ rgb8: context [
 ]
 
 hsl8: context [
+   ;; Converts an 8-bit HSL color to an 8-bit RGB color.
+   to-rgb: :rgb8/from-hsl
+
+   ;; Converts an 8-bit RGB color to an 8-bit HSL color.
+   from-rgb: :rgb8/to-hsl
+
    ;; Converts an 8-bit HSL tuple to an 8-bit RGB tuple.
    to-rgb8: :rgb8/from-hsl8
 
