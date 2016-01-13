@@ -130,12 +130,29 @@ rgb8: context [
        ]
     ]
 
-    ;; Converts an 8-bit tuple of RGB color to an 8-bit tuple
-    ;; of HSL values.
+    ;; Converts an RGB color to an HSL color.
+    to-hsl: func [r g b 'h 's 'l /local minc maxc chroma]
+    [
+       minc: min min r g b
+       maxc: max max r g b
+       chroma: to float! (maxc - minc)
+       ; convert to hue
+       set h 0
+       if chroma <> 0 [
+       	  ; M = R
+       	  if maxc = r [set h (modulo ((g - b) / chroma) 6)]
+       	  ; M = G
+       	  if maxc = g [set h (((b - r) / chroma) + 2)]
+       	  ; M = B
+       	  if maxc = b [set h (((r - g) / chroma) + 4)]
+       ]
+       ; ; convert to HSL
+       set h ((get h) * 60.0)
+       set l ((maxc + minc) * 0.5)
+       set s (either chroma <> 0 [chroma / (1 - absolute (2 * (get l) - 1))][0])
+    ]
 
-    ;; XXX see if we should used fixed point arithmetic, using
-    ;; floating point could possibly lead to colors being imprecisely
-    ;; derped with by hardware!
+    ;; Converts an 8-bit tuple of RGB color to an 8-bit tuple of HSL values.
     to-hsl8: func [
        color [tuple!]
        return: [tuple!]
@@ -145,23 +162,8 @@ rgb8: context [
        r: (color/1) / 255.0
        g: (color/2) / 255.0
        b: (color/3) / 255.0
-       minc: min min r g b
-       maxc: max max r g b
-       chroma: to float! (maxc - minc)
-       ; convert to hue
-       h: 0
-       if chroma <> 0 [
-	  ; M = R
-	  if maxc = r [h: modulo ((g - b) / chroma) 6]
-	  ; M = G
-	  if maxc = g [h: ((b - r) / chroma) + 2]
-	  ; M = B
-	  if maxc = b [h: ((r - g) / chroma) + 4]
-       ]
-       ; convert to HSL
-       h: (h * 60.0)
-       l: (maxc + minc) * 0.5
-       s: either chroma <> 0 [chroma / (1 - absolute (2 * l - 1))][0]
+       ; perform conversion
+       to-hsl r g b h s l
        ; now encode the result
        ret: 0.0.0
        ret/1: to integer! ((h / 360.0) * 255.0)
