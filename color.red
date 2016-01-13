@@ -269,35 +269,42 @@ rgb8: context [
        h: ((color/1) / 255.0) * 360.0
        s: (color/2) / 255.0
        v: (color/3) / 255.0
-       ; reverse engineer chroma
-       chroma: v * s
-       ; reverse engineer H from H'
-       h: h / 60.0
-       x: chroma * (1 - absolute (modulo (h - 1) 2))
-       ; make sure these are set, in case of weirdness
-       r: 0
-       g: 0
-       b: 0
-       ; figure out incomplete RGB values
-       switch round/down h [
-	  0 [r: chroma g: x]
-	  1 [r: x g: chroma]
-	  2 [g: chroma b: x]
-	  3 [g: x b: chroma]
-	  4 [r: x b: chroma]
-	  5 [r: chroma b: x]
-       ]
-       ; finalize RGB values
-       m: v - chroma
-       r: r + m
-       g: g + m
-       b: b + m
+       ; perform the conversion
+       from-hsv h s v r g b
        ; now return the soup
        ret: 0.0.0
        ret/1: to integer! (r * 255.0)
        ret/2: to integer! (g * 255.0)
        ret/3: to integer! (b * 255.0)
        ret
+    ]
+
+    ;; Converts an HSL color to an RGB color.
+    from-hsl: func[h s l 'r 'g 'b /local chroma x m hc]
+    [
+       ; reverse engineer chroma
+       chroma: (1 - absolute (2 * l - 1)) * s
+       ; reverse engineer H from H'
+       hc: h / 60.0
+       x: chroma * (1 - absolute (modulo (hc - 1) 2))
+       ; make sure these are set, in case of weirdness
+       set r 0
+       set g 0
+       set b 0
+       ; figure out incomplete RGB values
+       switch round/down h [
+	  0 [set r chroma set g x]
+	  1 [set r x set g chroma]
+	  2 [set g chroma set b x]
+	  3 [set g x set b chroma]
+	  4 [set r x set b chroma]
+	  5 [set r chroma set b x]
+       ]
+       ; finalize RGB values
+       m: l - (chroma * 0.5)
+       set r ((get r) + m)
+       set g ((get g) + m)
+       set b ((get b) + m)
     ]
 
     ;; Converts an 8-bit tuple of HSL color to an 8-bit tuple
@@ -311,29 +318,8 @@ rgb8: context [
        h: ((color/1) / 255.0) * 360.0
        s: (color/2) / 255.0
        l: (color/3) / 255.0
-       ; reverse engineer chroma
-       chroma: (1 - absolute (2 * l - 1)) * s
-       ; reverse engineer H from H'
-       h: h / 60.0
-       x: chroma * (1 - absolute (modulo (h - 1) 2))
-       ; make sure these are set, in case of weirdness
-       r: 0
-       g: 0
-       b: 0
-       ; figure out incomplete RGB values
-       switch round/down h [
-	  0 [r: chroma g: x]
-	  1 [r: x g: chroma]
-	  2 [g: chroma b: x]
-	  3 [g: x b: chroma]
-	  4 [r: x b: chroma]
-	  5 [r: chroma b: x]
-       ]
-       ; finalize RGB values
-       m: l - (chroma * 0.5)
-       r: r + m
-       g: g + m
-       b: b + m
+       ; perform the conversion
+       from-hsl h s l r g b
        ; now return the soup
        ret: 0.0.0
        ret/1: to integer! (r * 255.0)
