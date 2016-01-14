@@ -364,6 +364,7 @@ rgb8: context [
        to integer! ((to-saturation-hsv color) * 255.0)
     ]
 
+    ;; Mixes two colors together.
     mix: func [
        color [tuple!]
        target [tuple!]
@@ -392,6 +393,19 @@ rgb8: context [
     ][
        mix color 0.0.0 amount
     ]
+
+    ;; Returns the complement of the supplied color.
+    complement: func [
+        color [tuple!]
+        return: [tuple!]
+        /local ret
+     ][
+        ret: to-hsl8 color
+        ; complements are the opposite side of the color wheel from a given color
+        ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
+	ret: from-hsl8 ret
+        ret
+     ]
 ]
 
 hsl8: context [
@@ -433,14 +447,64 @@ hsl8: context [
       ret
    ]
 
-   ;; Returns the compliment of the supplied color.
-   compliment: func [
+   ;; Mixes two colors together.
+   mix: rgb8/mix ; NB has the same implementation for now
+
+   to-hue8: func [color [tuple!] return: [float!]]
+   [
+      (color/1)
+   ]
+
+   to-saturation-hsl8: func [color [tuple!] return: [float!]]
+   [
+      (color/2)
+   ]
+
+   to-saturation-hsv8: func [color [tuple!] return: [float!]]
+   [
+      (hsv8/from-hsv8 color)/2
+   ]
+
+   to-value8: func [color [tuple!] return: [float!]]
+   [
+      (hsv8/from-hsl8 color)/3
+   ]
+
+   to-lightness8: func [color [tuple!] return: [float!]]
+   [
+      (color/3)
+   ]
+
+   ;; Makes a color lighter by mixing saturation and lightness with white by `amount`.
+   tint: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      ret: 0.0.0
+      ret/2: to integer! lerp (color/2) 255 amount
+      ret/3: to integer! lerp (color/3) 255 amount
+      ret
+   ]
+
+   ;; Makes a color darker by mixing saturation and lightness with Black by a given `amount`.
+   shade: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      ret: 0.0.0
+      ret/2: to integer! lerp (color/2) 0 amount
+      ret/3: to integer! lerp (color/3) 0 amount
+      ret
+   ]
+
+   ;; Returns the complement of the supplied color.
+  complement: func [
       color [tuple!]
       return: [tuple!]
       /local ret
    ][
       ret: color
-      ; compliments are the opposite side of the color wheel from a given color
+      ; complements are the opposite side of the color wheel from a given color
       ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
       ret
    ]
@@ -540,14 +604,14 @@ hsv8: context [
       ]
    ]
 
-   ;; Returns the compliment of the supplied color.
-   compliment: func [
+   ;; Returns the complement of the supplied color.
+   complement: func [
       color [tuple!]
       return: [tuple!]
       /local ret
    ][
       ret: color
-      ; compliments are the opposite side of the color wheel from a given color
+      ; complements are the opposite side of the color wheel from a given color
       ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
       ret
    ]
@@ -643,7 +707,7 @@ print rgb8/from-hsl8 rgb8/to-hsl8 255.0.0
 print rgb8/to-hsv8 255.0.0
 print rgb8/from-hsv8 rgb8/to-hsv8 255.0.0
 
-print rgb8/from-hsl8 hsl8/compliment rgb8/to-hsl8 255.0.0
+print rgb8/from-hsl8 hsl8/complement rgb8/to-hsl8 255.0.0
 
 print lerp 50 100 0%
 print lerp 50 100 50%
