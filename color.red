@@ -20,6 +20,7 @@ lerp: func [
 ; XXX we might benefit from this
 ; http://lolengine.net/blog/2013/01/13/fast-rgb-to-hsv
 
+; XXX 'desaturate' does whatever desaturation routine is applicable to that colorspace; fancy photo software tends to expose all 3 as options, since they have different appearances.
 ; XXX this is all 8-bit color!
 
 rgb8: context [
@@ -307,105 +308,129 @@ rgb8: context [
        set b ((get b) + m)
     ]
 
-    ;; Converts an 8-bit tuple of HSL color to an 8-bit tuple
-    ;; of RGB values.
-    from-hsl8: func [
+   ;; Converts an 8-bit tuple of HSL color to an 8-bit tuple
+   ;; of RGB values.
+   from-hsl8: func [
+      color [tuple!]
+      return: [tuple!]
+      /local h s l x r g b ret
+   ][
+      ; unpack our colors
+      h: ((color/1) / 255.0) * 360.0
+      s: (color/2) / 255.0
+      l: (color/3) / 255.0
+      ; perform the conversion
+      from-hsl h s l r g b
+      ; now return the soup
+      ret: 0.0.0
+      ret/1: to integer! (r * 255.0)
+      ret/2: to integer! (g * 255.0)
+      ret/3: to integer! (b * 255.0)
+      ret
+   ]
+
+   ;; Retrieves the hue of a color, given an 8-bit RGB tuple.
+   ;; Returns the hue as an 8-bit integer.
+   to-hue8: func [
+      color [tuple!]
+      return: [integer!]
+   ][
+      to integer! (((to-hue color) / 360.0) * 255.0)
+   ]
+    ;; Retrieves the lightness of a color, given an 8-bit RGB tuple.
+   ;; Returns the lightness as an 8-bit integer.
+   to-lightness8: func [
+      color [tuple!]
+      return: [integer!]
+   ][
+      to integer! ((to-lightness color) * 255.0)
+   ]
+
+   ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
+   ;; Returns the saturation as an 8-bit integer.
+   to-saturation-hsl8: func [
+      color [tuple!]
+      return: [integer!]
+   ][
+      to integer! ((to-saturation-hsl color) * 255.0)
+   ]
+
+   ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
+   ;; Returns the saturation as an 8-bit integer.
+   to-saturation-hsv8: func [
+      color [tuple!]
+      return: [integer!]
+   ][
+      to integer! ((to-saturation-hsv color) * 255.0)
+   ]
+
+   ;; Mixes two colors together.
+   mix: func [
+      color [tuple!]
+      target [tuple!]
+      amount [float! percent!]
+      /local ret
+   ][
+      ret: 0.0.0
+      ret/1: to integer! lerp (color/1) (target/1) amount
+      ret/2: to integer! lerp (color/2) (target/2) amount
+      ret/3: to integer! lerp (color/3) (target/3) amount
+      ret
+   ]
+
+   ;; Makes a color lighter by mixing it with White by a given `amount`.
+   tint: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      mix color 255.255.255 amount
+   ]
+
+   ;; Makes a color darker by mixing it with Black by a given `amount`.
+   shade: func [
+      color [tuple!]
+      amount [float! percent!]
+   ][
+      mix color 0.0.0 amount
+   ]
+
+   ;; Returns the complement of the supplied color.
+   complement: func [
        color [tuple!]
        return: [tuple!]
-       /local h s l x r g b ret
-    ][
-       ; unpack our colors
-       h: ((color/1) / 255.0) * 360.0
-       s: (color/2) / 255.0
-       l: (color/3) / 255.0
-       ; perform the conversion
-       from-hsl h s l r g b
-       ; now return the soup
-       ret: 0.0.0
-       ret/1: to integer! (r * 255.0)
-       ret/2: to integer! (g * 255.0)
-       ret/3: to integer! (b * 255.0)
-       ret
-    ]
-
-    ;; Retrieves the hue of a color, given an 8-bit RGB tuple.
-    ;; Returns the hue as an 8-bit integer.
-    to-hue8: func [
-       color [tuple!]
-       return: [integer!]
-    ][
-       to integer! (((to-hue color) / 360.0) * 255.0)
-    ]
-
-    ;; Retrieves the lightness of a color, given an 8-bit RGB tuple.
-    ;; Returns the lightness as an 8-bit integer.
-    to-lightness8: func [
-       color [tuple!]
-       return: [integer!]
-    ][
-       to integer! ((to-lightness color) * 255.0)
-    ]
-
-    ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
-    ;; Returns the saturation as an 8-bit integer.
-    to-saturation-hsl8: func [
-       color [tuple!]
-       return: [integer!]
-    ][
-       to integer! ((to-saturation-hsl color) * 255.0)
-    ]
-
-    ;; Retrieves the saturation of a color, given an 8-bit RGB tuple.
-    ;; Returns the saturation as an 8-bit integer.
-    to-saturation-hsv8: func [
-       color [tuple!]
-       return: [integer!]
-    ][
-       to integer! ((to-saturation-hsv color) * 255.0)
-    ]
-
-    ;; Mixes two colors together.
-    mix: func [
-       color [tuple!]
-       target [tuple!]
-       amount [float! percent!]
        /local ret
     ][
-       ret: 0.0.0
-       ret/1: to integer! lerp (color/1) (target/1) amount
-       ret/2: to integer! lerp (color/2) (target/2) amount
-       ret/3: to integer! lerp (color/3) (target/3) amount
+       ret: to-hsl8 color
+       ; complements are the opposite side of the color wheel from a given color
+       ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
+ret: from-hsl8 ret
        ret
     ]
 
-    ;; Makes a color lighter by mixing it with White by a given `amount`.
-    tint: func [
-       color [tuple!]
-       amount [float! percent!]
-    ][
-       mix color 255.255.255 amount
-    ]
+   ;; Returns either light or dark, depending on which contrasts the most with the provided base color.  Adapted from Compass' contrast-color concept.
+   contrast: func [
+      base [tuple!]
+      light [tuple!]
+      dark [tuple!]
+      return: [tuple!]
+   ][
+      ; convert to HSV and let that module handle it
+      from-hsv8 hsv8/contrast to-hsv8 base to-hsv8 light to-hsv8 dark
+   ]
 
-    ;; Makes a color darker by mixing it with Black by a given `amount`.
-    shade: func [
-       color [tuple!]
-       amount [float! percent!]
-    ][
-       mix color 0.0.0 amount
-    ]
-
-    ;; Returns the complement of the supplied color.
-    complement: func [
-        color [tuple!]
-        return: [tuple!]
-        /local ret
-     ][
-        ret: to-hsl8 color
-        ; complements are the opposite side of the color wheel from a given color
-        ret/1: to integer! round ((modulo (((color/1) / 255.0) + 180.0) 360.0) / 360.0) * 255.0
-	ret: from-hsl8 ret
-        ret
-     ]
+   ;; Removes all saturation from a color.
+   desaturate: func [
+      color [tuple!]
+      return: [tuple!]
+      /local ret x
+   ][
+      x: ((color/1) + (color/2) + (color/3)) / 3
+      ret: 0.0.0
+      ret/1: x
+      ret/2: x
+      ret/3: x
+      ret
+   ]
 ]
 
 hsl8: context [
